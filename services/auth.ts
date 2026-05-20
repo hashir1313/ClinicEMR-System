@@ -28,8 +28,7 @@ export async function getDoctorFromSession(): Promise<Doctor | null> {
     return doctor as Doctor;
   }
   
-  // Return user as doctor if no doctor record found (fallback for client)
-  return { id: user.id, email: user.email || '', created_at: '' };
+  return null;
 }
 
 export async function requireAuth() {
