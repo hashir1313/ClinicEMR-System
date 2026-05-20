@@ -3,21 +3,33 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getVisit, deleteVisit } from '@/services/database';
+import { getVisit, getPatient, deleteVisit } from '@/services/database';
+import { getDoctorFromSession } from '@/services/auth';
 import { deletePrescriptionFiles } from '@/services/storage';
 import Navbar from '@/components/Navbar';
-import type { Visit } from '@/types';
+import PrintButton from '@/components/PrintButton';
+import type { Visit, Patient, Doctor } from '@/types';
 
 export default function VisitDetailPage() {
   const router = useRouter();
   const params = useParams();
   const [visit, setVisit] = useState<Visit | null>(null);
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    getVisit(params.visitId as string)
-      .then(setVisit)
+    Promise.all([
+      getVisit(params.visitId as string),
+      getPatient(params.id as string),
+      getDoctorFromSession(),
+    ])
+      .then(([visitData, patientData, doctorData]) => {
+        setVisit(visitData);
+        setPatient(patientData);
+        setDoctor(doctorData);
+      })
       .catch(() => router.push(`/patients/${params.id}`))
       .finally(() => setLoading(false));
   }, [params.visitId, params.id, router]);
@@ -82,6 +94,9 @@ export default function VisitDetailPage() {
               </p>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
+              {patient && visit && doctor && (
+                <PrintButton patient={patient} visit={visit} doctor={doctor} />
+              )}
               <Link
                 href={`/patients/${params.id}/visits/${params.visitId}/edit`}
                 style={{ padding: '0.5rem 1rem', backgroundColor: '#10b981', color: 'white', borderRadius: '0.5rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem' }}

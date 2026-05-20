@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Clinic EMR System",
-  description: "Private clinic management system for doctors",
+  title: "Elinic EMR System",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
